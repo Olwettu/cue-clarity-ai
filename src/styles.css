@@ -146,3 +146,54 @@
     box-shadow 0.2s ease,
     filter 0.2s ease;
 }
+
+@layer components {
+  .cue-prose :where(p) {
+    margin-block: 0.35rem;
+  }
+  .cue-prose :where(ul, ol) {
+    margin-block: 0.4rem;
+    padding-inline-start: 1.15rem;
+  }
+  .cue-prose :where(ul) {
+    list-style: disc;
+  }
+  .cue-prose :where(ol) {
+    list-style: decimal;
+  }
+  .cue-prose :where(li) {
+    margin-block: 0.15rem;
+  }
+  .cue-prose :where(strong) {
+    font-weight: 600;
+  }
+  .cue-prose :where(em) {
+    font-style: italic;
+  }
+  .cue-prose :where(a) {
+    text-decoration: underline;
+  }
+  .cue-prose :where(code) {
+    background: oklch(1 0 0 / 0.7);
+    border-radius: 0.4rem;
+    padding: 0.05rem 0.3rem;
+    font-size: 0.85em;
+  }
+  .cue-prose :where(table) {
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin-block: 0.6rem;
+    font-size: 0.8125rem;
+  }
+  .cue-prose :where(th, td) {
+    border: 1px solid oklch(1 0 0 / 0.75);
+    padding: 0.4rem 0.55rem;
+    text-align: left;
+  }
+  .cue-prose :where(th) {
+    background: oklch(1 0 0 / 0.6);
+    font-weight: 600;
+  }
+}
