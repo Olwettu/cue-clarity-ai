@@ -48,6 +48,7 @@ function CuePage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [hello, setHello] = useState("Hello");
 
   // Restore persisted output — never cleared on unmount.
   useEffect(() => {
@@ -57,6 +58,7 @@ function CuePage() {
     } catch {
       setMessages([]);
     }
+    setHello(greeting());
     setHydrated(true);
   }, []);
 
@@ -97,7 +99,7 @@ function CuePage() {
             <div>
               <h1 className="font-display text-3xl font-bold sm:text-4xl">Cue</h1>
               <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-                {greeting()}, Olwethu
+                {hello}, Olwethu
               </p>
             </div>
           </header>
