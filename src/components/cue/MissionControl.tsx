@@ -21,7 +21,7 @@ export function splitSections(markdown: string): Section[] {
     const heading = line.match(/^\s{0,3}(?:#{1,4}\s+|\*\*)?(?:\d+[.)]\s*)?([A-Za-z][^*#\n]{2,60})(?:\*\*)?\s*:?\s*$/);
     const isHeading = /^\s{0,3}(#{1,4}\s|\*\*.+\*\*\s*:?\s*$|\d+[.)]\s+[A-Z])/.test(line) && line.trim().length < 80;
     if (isHeading && heading) {
-      const title = heading[1].replace(/\*\*/g, "").trim();
+      const title = (heading[1] ?? "Section").replace(/\*\*/g, "").trim();
       current = { title, body: "", tag: tagFor(title) };
       sections.push(current);
     } else if (current) {
