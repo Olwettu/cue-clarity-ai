@@ -52,6 +52,27 @@ function CuePage() {
   const [hydrated, setHydrated] = useState(false);
   const [hello, setHello] = useState("Hello");
 
+  const {
+    isListening,
+    interim,
+    supported: voiceSupported,
+    error: voiceError,
+    toggleListening,
+    clearError,
+  } = useSpeechToText((chunk) => {
+    setNotes((prev) => {
+      const base = prev.trim();
+      return base ? `${base} ${chunk}` : chunk;
+    });
+  });
+
+  const displayNotes = useMemo(() => {
+    if (!interim) return notes;
+    const base = notes.trim();
+    return base ? `${base} ${interim}` : interim;
+  }, [notes, interim]);
+
+
   // Restore persisted output — never cleared on unmount.
   // The input itself is never persisted: it lives only in React state and
   // any browser form-restoration value is discarded on mount.
