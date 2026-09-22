@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 type SpeechRecognitionEvent = {
   resultIndex: number;
   results: {
-    [index: number]: { isFinal: boolean; 0: { transcript: string } };
+    [index: number]: { isFinal: boolean; 0: { transcript: string } } | undefined;
     length: number;
   };
 };
@@ -57,8 +57,10 @@ export function useSpeechToText(onFinal: (transcript: string) => void) {
       let interimChunk = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
+        const result = event.results[i];
+        if (!result) continue;
+        const transcript = result[0].transcript;
+        if (result.isFinal) {
           finalChunk += transcript;
         } else {
           interimChunk += transcript;
@@ -120,20 +122,12 @@ export function useSpeechToText(onFinal: (transcript: string) => void) {
     setError(null);
   }
 
-  const displayInterim = notesWithInterim(notes, interim);
-
   return {
     isListening,
     supported,
     error,
-    interim: displayInterim,
+    interim,
     toggleListening,
     clearError,
   };
-}
-
-function notesWithInterim(notes: string, interim: string): string {
-  if (!interim) return notes;
-  const base = notes.trim();
-  return base ? `${base} ${interim}` : interim;
 }
