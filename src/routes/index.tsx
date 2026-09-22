@@ -81,6 +81,7 @@ function CuePage() {
     try {
       const content = await askCue({ mode: "summary", input: notes });
       setResult(content);
+      setNotes("");
       setTab("summary");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Cue could not complete this run.");
@@ -114,6 +115,11 @@ function CuePage() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              name="cue-notes"
+              id="cue-notes"
               rows={8}
               placeholder="Meeting notes, brain dumps, half-formed plans…"
               className="mt-5 w-full resize-y rounded-2xl border border-white/70 bg-white/65 p-4 text-sm leading-relaxed outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
