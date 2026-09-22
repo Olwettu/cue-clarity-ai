@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Sparkle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Sparkle, Mic } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Sidebar, type CueTab } from "@/components/cue/Sidebar";
 import { GlassCard } from "@/components/cue/Glass";
 import { MissionControl } from "@/components/cue/MissionControl";
 import { FloatingChat, type ChatMessage } from "@/components/cue/FloatingChat";
+import { useSpeechToText } from "@/hooks/use-speech-to-text";
 import { askCue } from "@/lib/cue-api";
 
 export const Route = createFileRoute("/")({
@@ -49,6 +51,27 @@ function CuePage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [hello, setHello] = useState("Hello");
+
+  const {
+    isListening,
+    interim,
+    supported: voiceSupported,
+    error: voiceError,
+    toggleListening,
+    clearError,
+  } = useSpeechToText((chunk) => {
+    setNotes((prev) => {
+      const base = prev.trim();
+      return base ? `${base} ${chunk}` : chunk;
+    });
+  });
+
+  const displayNotes = useMemo(() => {
+    if (!interim) return notes;
+    const base = notes.trim();
+    return base ? `${base} ${interim}` : interim;
+  }, [notes, interim]);
+
 
   // Restore persisted output — never cleared on unmount.
   // The input itself is never persisted: it lives only in React state and
@@ -120,19 +143,49 @@ function CuePage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Drop your notes, ideas, tasks, links or questions...
             </p>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              name="cue-notes"
-              id="cue-notes"
-              rows={8}
-              placeholder="Meeting notes, brain dumps, half-formed plans…"
-              className="mt-5 w-full resize-y rounded-2xl border border-white/70 bg-white/65 p-4 text-sm leading-relaxed outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
-            />
+            <div className="relative mt-5">
+              <textarea
+                value={displayNotes}
+                onChange={(e) => setNotes(e.target.value)}
+                readOnly={isListening}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                name="cue-notes"
+                id="cue-notes"
+                rows={8}
+                placeholder="Meeting notes, brain dumps, half-formed plans…"
+                className="w-full resize-y rounded-2xl border border-white/70 bg-white/65 p-4 pr-12 text-sm leading-relaxed outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  clearError();
+                  toggleListening();
+                }}
+                disabled={!voiceSupported}
+                aria-label={isListening ? "Stop voice input" : "Start voice input"}
+                className={cn(
+                  "absolute right-3 top-3 inline-flex items-center justify-center rounded-full p-2 transition",
+                  isListening
+                    ? "glow-active animate-pulse text-foreground"
+                    : "glass-soft text-muted-foreground hover:text-foreground",
+                  !voiceSupported && "cursor-not-allowed opacity-50",
+                )}
+              >
+                <Mic className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+            {voiceError && (
+              <p className="mt-2 text-sm text-destructive">{voiceError}</p>
+            )}
+            {!voiceSupported && (
+              <p className="mt-2 text-sm text-destructive">
+                Voice input is not available on this device.
+              </p>
+            )}
             <div className="mt-5 flex flex-wrap items-center gap-3">
+
               <button
                 type="button"
                 onClick={() => void runCue()}
