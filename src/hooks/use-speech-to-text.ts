@@ -22,8 +22,16 @@ export function useSpeechToText(onFinal: (transcript: string) => void) {
   const recognitionRef = useRef<any>(null);
   const onFinalRef = useRef(onFinal);
   const interimRef = useRef("");
+  const mountedRef = useRef(true);
 
   onFinalRef.current = onFinal;
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -41,15 +49,25 @@ export function useSpeechToText(onFinal: (transcript: string) => void) {
     rec.interimResults = true;
     rec.lang = "en-US";
 
-    rec.onstart = () => setIsListening(true);
+    const safeSetIsListening = (value: boolean) => {
+      if (mountedRef.current) setIsListening(value);
+    };
+    const safeSetInterim = (value: string) => {
+      if (mountedRef.current) setInterim(value);
+    };
+    const safeSetError = (value: string | null) => {
+      if (mountedRef.current) setError(value);
+    };
+
+    rec.onstart = () => safeSetIsListening(true);
 
     rec.onend = () => {
-      setIsListening(false);
+      safeSetIsListening(false);
       if (interimRef.current.trim()) {
         onFinalRef.current(interimRef.current.trim());
-        setInterim("");
-        interimRef.current = "";
       }
+      interimRef.current = "";
+      safeSetInterim("");
     };
 
     rec.onresult = (event: SpeechRecognitionEvent) => {
@@ -69,23 +87,23 @@ export function useSpeechToText(onFinal: (transcript: string) => void) {
 
       if (finalChunk) {
         onFinalRef.current(finalChunk.trim());
-        setInterim("");
         interimRef.current = "";
+        safeSetInterim("");
       } else {
-        setInterim(interimChunk);
         interimRef.current = interimChunk;
+        safeSetInterim(interimChunk);
       }
     };
 
     rec.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error === "not-allowed") {
-        setError("Microphone permission was denied.");
+        safeSetError("Microphone permission was denied.");
       } else if (event.error === "no-speech") {
         // Ignore short silences; the user can stop manually.
       } else {
-        setError("Voice input failed. Please try again.");
+        safeSetError("Voice input failed. Please try again.");
       }
-      setIsListening(false);
+      safeSetIsListening(false);
     };
 
     recognitionRef.current = rec;
