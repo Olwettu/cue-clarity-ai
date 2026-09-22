@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Sparkle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Sparkle, Mic } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Sidebar, type CueTab } from "@/components/cue/Sidebar";
 import { GlassCard } from "@/components/cue/Glass";
 import { MissionControl } from "@/components/cue/MissionControl";
 import { FloatingChat, type ChatMessage } from "@/components/cue/FloatingChat";
+import { useSpeechToText } from "@/hooks/use-speech-to-text";
 import { askCue } from "@/lib/cue-api";
 
 export const Route = createFileRoute("/")({
