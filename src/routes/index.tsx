@@ -51,6 +51,14 @@ function CuePage() {
   const [hello, setHello] = useState("Hello");
 
   // Restore persisted output — never cleared on unmount.
+  // The input itself is never persisted: it lives only in React state and
+  // any browser form-restoration value is discarded on mount.
+  useEffect(() => {
+    setNotes("");
+    localStorage.removeItem("cue.notes");
+    sessionStorage.removeItem("cue.notes");
+  }, []);
+
   useEffect(() => {
     setResult(localStorage.getItem(STORAGE_KEY) ?? "");
     try {
